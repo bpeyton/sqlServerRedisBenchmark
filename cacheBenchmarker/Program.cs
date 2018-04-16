@@ -7,6 +7,11 @@ namespace cacheBenchmarker
         static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
+            SqlServerBenchmarker blah = new SqlServerBenchmarker();
+            blah.GetConn().Wait();
+            blah.DoInsert(blah.GetConn()).Wait();
+
+
         }
     }
 }
