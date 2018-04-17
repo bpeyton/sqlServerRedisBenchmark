@@ -1,4 +1,6 @@
 ﻿
+Session after a day: 68k sessions, 3.8 million values
+
 
 for this
 
@@ -57,4 +59,44 @@ ALTER DATABASE CacheTest
 Hello World!
 100000 rows written.. 2.5541233 seconds... 39152.3776475474 rows per second
 Press any key to continue . . .
+
+
+
+
+
+reading 1000 rows from CacheDisk
+
+Hello World!
+Got guids
+1000 rows read.. 38.676731 seconds... 25.8553392219213 rows per second
+Press any key to continue . . .
+
+
+
+            //Parallel.ForEach(guids, new ParallelOptions() { MaxDegreeOfParallelism = 10 }, x =>
+            using (SqlConnection conn = GetConn())
+            {
+                foreach (string x in guids)
+                {
+
+                    //DoInsert(conn);
+                    DoGet(conn, x);
+
+                }
+
+            }
+
+reading 1000 rows from cache (also 1 million rows)
+			Hello World!
+Got guids
+1000 rows read.. 36.8067877 seconds... 27.1689017838414 rows per second
+Press any key to continue . . .
+
+
+cacheDisk
+Hello World!
+Got guids
+1000 rows read.. 39.1891541 seconds... 25.5172642269408 rows per second
+Press any key to continue . . .
+
 
