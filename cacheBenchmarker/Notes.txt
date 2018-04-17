@@ -1,0 +1,60 @@
+﻿
+
+for this
+
+
+CREATE TABLE [dbo].[cache]
+(
+	[cacheKey] [varchar](200) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+	[cacheValue] [varchar](max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+
+ CONSTRAINT [cache_primaryKey]  PRIMARY KEY NONCLUSTERED HASH 
+(
+	[cacheKey]
+)WITH ( BUCKET_COUNT = 64)
+)WITH ( MEMORY_OPTIMIZED = ON , DURABILITY = SCHEMA_ONLY )
+GO
+
+ALTER DATABASE CacheTest
+	 SET DELAYED_DURABILITY = DISABLED     
+100000 rows written.. 34.5026864 seconds... 2898.32504172776 rows per second
+
+
+ALTER DATABASE CacheTest
+	 SET DELAYED_DURABILITY = FORCED    
+100000 rows written.. 3.6496405 seconds... 27399.9589822614 rows per second
+
+for this
+
+USE [CacheTest]
+GO
+
+/****** Object:  Table [dbo].[cache]    Script Date: 4/16/2018 8:40:35 PM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[cacheDisk]
+(
+	[cacheKey] [varchar](200) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+	[cacheValue] [varchar](max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+
+ CONSTRAINT [cacheDisk_primaryKey]  PRIMARY KEY
+(
+	[cacheKey]
+) 
+)
+GO
+
+
+ALTER DATABASE CacheTest
+	 SET DELAYED_DURABILITY = DISABLED     
+
+100000 rows written.. 33.1760031 seconds... 3014.22687050569 rows per second
+
+Hello World!
+100000 rows written.. 2.5541233 seconds... 39152.3776475474 rows per second
+Press any key to continue . . .
+

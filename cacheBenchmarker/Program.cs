@@ -10,7 +10,7 @@ namespace cacheBenchmarker
             SqlServerBenchmarker blah = new SqlServerBenchmarker();
             //blah.GetConn().Wait();
             //blah.DoInsert(blah.GetConn()).Wait();
-            blah.DoInserts().Wait();
+            blah.DoInserts();
 
         }
     }
