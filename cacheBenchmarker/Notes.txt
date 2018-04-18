@@ -111,3 +111,11 @@ cacheMem
 cacheDisk
 100000 rows read.. 2.0292121 seconds... 49280.2107773751 rows per second
 
+----
+
+docker run --name some-redis -d redis --network host
+docker run --network host  -p 6379 --name some-redis redis
+docker run -it --link some-redis:redis --rm redis redis-cli -h redis -p 6379
+
+docker run  -p 6379 --name some-redis redis
+
