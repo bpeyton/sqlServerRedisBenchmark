@@ -100,3 +100,14 @@ Got guids
 Press any key to continue . . .
 
 
+------------
+
+after adding stored procs...
+
+cacheMem
+100000 rows read.. 1.9186626 seconds... 52119.637918621 rows per second
+
+
+cacheDisk
+100000 rows read.. 2.0292121 seconds... 49280.2107773751 rows per second
+

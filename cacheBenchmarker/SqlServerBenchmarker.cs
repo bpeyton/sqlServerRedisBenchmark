@@ -23,7 +23,7 @@ namespace cacheBenchmarker
         public void DoInsert(SqlConnection conn)
         {
             Random random = new Random();
-            SqlCommand cmd = new SqlCommand("insert into cache (cacheKey, cacheValue) values (@cacheKey, @cacheValue);", conn);
+            SqlCommand cmd = new SqlCommand("insert into cacheDisk (cacheKey, cacheValue) values (@cacheKey, @cacheValue);", conn);
             string guidStr = Guid.NewGuid().ToString();
             guids.Add(guidStr);
             cmd.Parameters.AddWithValue("cacheKey", guidStr);
@@ -37,7 +37,9 @@ namespace cacheBenchmarker
         {
 
 
-            SqlCommand cmd = new SqlCommand("select cacheValue from cacheDisk where cacheKey=@cacheKey;", conn);
+            //SqlCommand cmd = new SqlCommand("select cacheValue from cacheMem where cacheKey=@cacheKey;", conn);
+            SqlCommand cmd = new SqlCommand("getCacheDisk", conn);
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
             cmd.Parameters.AddWithValue("cacheKey", cacheKey);
             string val = (string)(cmd.ExecuteScalar());
             return val;
@@ -50,7 +52,8 @@ namespace cacheBenchmarker
         {
             using (SqlConnection conn = GetConn())
             {
-                SqlCommand cmd = new SqlCommand("select top 1000 cacheKey from cacheDisk;", conn);
+                SqlCommand cmd = new SqlCommand("select top 100000 cacheKey from cacheMem;", conn);
+                
                 //cmd.Parameters.AddWithValue("cacheKey", cacheKey);
                 //string val = (string)(await cmd.ExecuteScalarAsync());
                 using (SqlDataReader reader = cmd.ExecuteReader())
@@ -69,10 +72,10 @@ namespace cacheBenchmarker
         public void DoInserts()
         {
             DateTime startTime = DateTime.Now;
-            const int inserts = 100000;
+            const int inserts = 1000000;
             //const int inserts = 2000000;
             //const int numParallel = 10000;
-            Parallel.For(0, inserts, new ParallelOptions() { MaxDegreeOfParallelism = 15 }, x =>
+            Parallel.For(0, inserts, new ParallelOptions() { MaxDegreeOfParallelism = 10 }, x =>
             {
                 //for (int i = 0; i < inserts / numParallel; i++)
                 //{
@@ -97,18 +100,19 @@ namespace cacheBenchmarker
             Console.WriteLine("Got guids");
             DateTime startTime = DateTime.Now;
 
-            //Parallel.ForEach(guids, new ParallelOptions() { MaxDegreeOfParallelism = 10 }, x =>
-            using (SqlConnection conn = GetConn())
+            //foreach (string x in guids)
+            Parallel.ForEach(guids, x =>
             {
-                foreach (string x in guids)
+
+                using (SqlConnection conn = GetConn())
                 {
+
 
                     //DoInsert(conn);
                     DoGet(conn, x);
-
                 }
+            });
 
-            }
             DateTime endTime = DateTime.Now;
             double seconds = (endTime - startTime).TotalSeconds;
             double rowsPerSecond = guids.Count / seconds;
