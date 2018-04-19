@@ -6,13 +6,15 @@ namespace cacheBenchmarker
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Console.WriteLine("Running benchmark!");
             SqlServerBenchmarker blah = new SqlServerBenchmarker();
             //blah.GetConn().Wait();
             //blah.DoInsert(blah.GetConn()).Wait();
             //RedisBenchmarker blah = new RedisBenchmarker();
-            //blah.DoInserts().Wait();
-            
+            blah.memOrDisk = "Disk";
+            Console.WriteLine(blah.memOrDisk);
+            blah.DoInserts().Wait();
+            blah.RebuildIndex();
             blah.DoGets().Wait();
         }
     }

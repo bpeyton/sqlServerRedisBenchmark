@@ -125,8 +125,20 @@ docker run  -p 6379 --name some-redis redis
 
 after adding insert stored procs, and recoding inserts as async
 
+
 Hello World!
-1000000 rows written.. 84.7620352 seconds... 11797.7346537333 rows per second
+Mem
+1000000 rows written.. 82.0324502 seconds... 12190.2978341125 rows per second
+Got guids
+100000 rows read.. 5.3198947 seconds... 18797.3645418207 rows per second
+Press any key to continue . . .
+
+
+Hello World!
+Disk
+1000000 rows written.. 92.4450052 seconds... 10817.2420763734 rows per second
+Got guids
+100000 rows read.. 8.1507143 seconds... 12268.8633559392 rows per second
 Press any key to continue . . .
 
 

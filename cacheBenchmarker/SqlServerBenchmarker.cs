@@ -109,6 +109,18 @@ namespace cacheBenchmarker
             Console.WriteLine($"{inserts} rows written.. {seconds} seconds... {rowsPerSecond} rows per second");
         }
 
+        public void RebuildIndex()
+        {
+            
+            const string sql = "ALTER INDEX [cacheDisk_primaryKey] ON [dbo].[cacheDisk] REBUILD PARTITION = ALL WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, RESUMABLE = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)";
+            using (SqlConnection conn =  GetConn().Result)
+            {
+                SqlCommand cmd = new SqlCommand(sql, conn);
+                cmd.ExecuteNonQuery();
+
+            }
+        }
+
         public async Task DoGets()
         {
             //List<string> guids = GetGuids();
