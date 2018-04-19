@@ -4,13 +4,14 @@ using System.Text;
 using StackExchange.Redis;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Collections.Concurrent;
 
 namespace cacheBenchmarker
 {
     class RedisBenchmarker
     {
         ConnectionMultiplexer redis = ConnectionMultiplexer.Connect("localhost:32768");
-        List<string> ids = new List<string>(100000);
+        ConcurrentBag<string> ids = new ConcurrentBag<string>();
 
         public async Task DoInserts()
         {

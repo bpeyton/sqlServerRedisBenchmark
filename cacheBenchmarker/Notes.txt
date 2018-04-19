@@ -119,3 +119,14 @@ docker run -it --link some-redis:redis --rm redis redis-cli -h redis -p 6379
 
 docker run  -p 6379 --name some-redis redis
 
+
+
+-----------------
+
+after adding insert stored procs, and recoding inserts as async
+
+Hello World!
+1000000 rows written.. 84.7620352 seconds... 11797.7346537333 rows per second
+Press any key to continue . . .
+
+

@@ -11,37 +11,42 @@ namespace cacheBenchmarker
     class SqlServerBenchmarker
     {
         ConcurrentBag<string> guids = new ConcurrentBag<string>();
+        public string memOrDisk = "Mem";
 
-
-        public SqlConnection GetConn()
+        public async Task<SqlConnection> GetConn()
         {
             SqlConnection conn = new SqlConnection(cfg.ConnectionStrings["sqlConn"].ConnectionString);
-            conn.Open();
+            await conn.OpenAsync();
             return conn;
         }
 
-        public void DoInsert(SqlConnection conn)
+        public async Task DoInsert(SqlConnection conn, bool addToBag)
         {
             Random random = new Random();
-            SqlCommand cmd = new SqlCommand("insert into cacheDisk (cacheKey, cacheValue) values (@cacheKey, @cacheValue);", conn);
+            //SqlCommand cmd = new SqlCommand("insert into cacheDisk (cacheKey, cacheValue) values (@cacheKey, @cacheValue);", conn);
+            SqlCommand cmd = new SqlCommand("insertCache" + memOrDisk, conn);
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
             string guidStr = Guid.NewGuid().ToString();
-            guids.Add(guidStr);
+            if (addToBag)
+            {
+                guids.Add(guidStr);
+            }
             cmd.Parameters.AddWithValue("cacheKey", guidStr);
             cmd.Parameters.AddWithValue("cacheValue", random.Next().ToString());
-            cmd.ExecuteNonQuery();
-
+            await cmd.ExecuteNonQueryAsync();
+            return;
         }
 
 
-        public string DoGet(SqlConnection conn, string cacheKey)
+        public async Task<string> DoGet(SqlConnection conn, string cacheKey)
         {
 
 
             //SqlCommand cmd = new SqlCommand("select cacheValue from cacheMem where cacheKey=@cacheKey;", conn);
-            SqlCommand cmd = new SqlCommand("getCacheDisk", conn);
+            SqlCommand cmd = new SqlCommand("getCache" + memOrDisk, conn);
             cmd.CommandType = System.Data.CommandType.StoredProcedure;
             cmd.Parameters.AddWithValue("cacheKey", cacheKey);
-            string val = (string)(cmd.ExecuteScalar());
+            string val = (string)(await cmd.ExecuteScalarAsync());
             return val;
         }
 
@@ -50,7 +55,7 @@ namespace cacheBenchmarker
 
         public List<string> GetGuids()
         {
-            using (SqlConnection conn = GetConn())
+            using (SqlConnection conn = GetConn().Result)
             {
                 SqlCommand cmd = new SqlCommand("select top 100000 cacheKey from cacheMem;", conn);
                 
@@ -69,49 +74,64 @@ namespace cacheBenchmarker
             }
         }
 
-        public void DoInserts()
+        public async Task DoInserts()
         {
             DateTime startTime = DateTime.Now;
             const int inserts = 1000000;
+            //const int inserts = 100;
             //const int inserts = 2000000;
-            //const int numParallel = 10000;
-            Parallel.For(0, inserts, new ParallelOptions() { MaxDegreeOfParallelism = 10 }, x =>
+            const int numChunk = 1000;
+            
+            using (SqlConnection conn = await GetConn())
             {
-                //for (int i = 0; i < inserts / numParallel; i++)
-                //{
-                using (SqlConnection conn = GetConn())
+                //List<SqlConnection> sqlConnections = new List<SqlConnection>(inserts);
+                for (int i = 0; i < inserts; i++)
                 {
-                    DoInsert(conn);
-                    //insertTask.Wait();
+                    List<Task> tasks = new List<Task>(inserts);
+                    int nextChunk = i + numChunk;
+                    for (;i < nextChunk; i++)
+                    {
+                        tasks.Add(DoInsert(conn, i % 10 == 0));
+                    }
+
+                    //sqlConnections.Add(conn);
+                    await Task.WhenAll(tasks);
+
                 }
-                //tasks.Add(insertTask);
-                //}
-                // Task.WhenAll(tasks).Wait();
-            });
+
+                
+            }
+            //tasks.ForEach(conn => { conn.Dispose(); });
+
             DateTime endTime = DateTime.Now;
             double seconds = (endTime - startTime).TotalSeconds;
             double rowsPerSecond = inserts / seconds;
             Console.WriteLine($"{inserts} rows written.. {seconds} seconds... {rowsPerSecond} rows per second");
         }
 
-        public void DoGets()
+        public async Task DoGets()
         {
-            List<string> guids = GetGuids();
+            //List<string> guids = GetGuids();
             Console.WriteLine("Got guids");
             DateTime startTime = DateTime.Now;
 
             //foreach (string x in guids)
-            Parallel.ForEach(guids, x =>
-            {
+            //Parallel.ForEach(guids, x =>
+            //{
 
-                using (SqlConnection conn = GetConn())
+            const string strGuid = "4e57a384-1ab5-4e8c-afea-08598cf95127";
+
+            using (SqlConnection conn = await GetConn())
+            {
+                List<Task<string>> tasks = new List<Task<string>>(guids.Count);
+                foreach (string x in guids)
                 {
 
-
-                    //DoInsert(conn);
-                    DoGet(conn, x);
+                    tasks.Add(DoGet(conn, x));
                 }
-            });
+                await Task.WhenAll(tasks);
+            }
+            //});
 
             DateTime endTime = DateTime.Now;
             double seconds = (endTime - startTime).TotalSeconds;
