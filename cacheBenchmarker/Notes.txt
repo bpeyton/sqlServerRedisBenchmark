@@ -142,3 +142,21 @@ Got guids
 Press any key to continue . . .
 
 
+------------
+
+Disk
+1000000 rows written.. 92.6539496 seconds... 10792.848057931 rows per second
+Got guids
+100000 rows read.. 8.3530457 seconds... 11971.6811797163 rows per second
+Mem
+1000000 rows written.. 84.5470616 seconds... 11827.7321656794 rows per second
+Got guids
+100000 rows read.. 5.5505835 seconds... 18016.1238903982 rows per second
+
+----------------
+Running benchmark!
+All redis dbs flushed!
+1000000 sets completed.. 4.4315105 seconds... 22565.669200152 gets per second
+100000 gets read.. 0.2672476 seconds... 374184.838329699 gets per second
+random value 132202959
+Press any key to continue . . .

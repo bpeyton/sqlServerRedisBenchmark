@@ -10,8 +10,27 @@ namespace cacheBenchmarker
 {
     class RedisBenchmarker
     {
-        ConnectionMultiplexer redis = ConnectionMultiplexer.Connect("localhost:32768");
+        const string connectionStr = "localhost:32768";
+        
+
+        
+        ConnectionMultiplexer redis;
         ConcurrentBag<string> ids = new ConcurrentBag<string>();
+
+        public RedisBenchmarker()
+        {
+            ConfigurationOptions options = ConfigurationOptions.Parse(connectionStr);
+            options.AllowAdmin = true;
+            redis = ConnectionMultiplexer.Connect(options);
+        }
+
+        public void DeleteData()
+        {
+            IServer server = redis.GetServer(connectionStr);
+            
+            server.FlushDatabase();
+            Console.WriteLine("All redis dbs flushed!");
+        }
 
         public async Task DoInserts()
         {
@@ -19,7 +38,7 @@ namespace cacheBenchmarker
             IDatabase db = redis.GetDatabase();
 
             int count = 0;
-
+            DateTime startTime = DateTime.Now;
             //Parallel.For(0, 1000000, new ParallelOptions() { MaxDegreeOfParallelism = 10 }, i =>
             const int numInserts = 1000000;
             List<Task<bool>> sets = new List<Task<bool>>(numInserts);
@@ -36,14 +55,19 @@ namespace cacheBenchmarker
                 {
                     ids.Add(guidStr);
                 }
-                if (count % 10000 == 0)
-                {
-                    Console.WriteLine("count = " + count.ToString());
-                }
+                //if (count % 10000 == 0)
+                //{
+                //    Console.WriteLine("count = " + count.ToString());
+                //}
             }
             
             await Task.WhenAll(sets);
+            DateTime endTime = DateTime.Now;
+            double seconds = (endTime - startTime).TotalSeconds;
+            double rowsPerSecond = ids.Count / seconds;
+            Console.WriteLine($"{numInserts} sets completed.. {seconds} seconds... {rowsPerSecond} gets per second");
             
+
         }
 
         public async Task DoGets()

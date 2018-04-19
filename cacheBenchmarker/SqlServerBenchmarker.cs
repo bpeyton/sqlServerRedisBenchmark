@@ -20,6 +20,15 @@ namespace cacheBenchmarker
             return conn;
         }
 
+        public void DeleteData()
+        {
+            using (SqlConnection conn = GetConn().Result)
+            {
+                SqlCommand cmd = new SqlCommand("delete from cache" + memOrDisk, conn);
+                cmd.ExecuteNonQuery();
+            }
+        }
+
         public async Task DoInsert(SqlConnection conn, bool addToBag)
         {
             Random random = new Random();
