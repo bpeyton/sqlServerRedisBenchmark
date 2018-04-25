@@ -28,7 +28,7 @@ namespace cacheBenchmarker
         {
             IServer server = redis.GetServer(connectionStr);
             
-            server.FlushDatabase();
+            server.FlushDatabaseAsync().Wait();
             Console.WriteLine("All redis dbs flushed!");
         }
 
