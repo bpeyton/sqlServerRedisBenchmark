@@ -4,16 +4,18 @@ namespace cacheBenchmarker
 {
     class Program
     {
+        const int numInserts = 10000000;
+        const int numReads = 100000;
         static void Main(string[] args)
         {
             Console.WriteLine("Running benchmark!");
             BenchmarkSqlServer();
-            BenchmarkRedis();
+            //BenchmarkRedis();
         }
 
         static void BenchmarkSqlServer()
         {
-            SqlServerBenchmarker blah = new SqlServerBenchmarker();
+            SqlServerBenchmarker blah = new SqlServerBenchmarker(numInserts, numReads);
             blah.memOrDisk = "Disk";
             Console.WriteLine(blah.memOrDisk);
             blah.DeleteData();
@@ -21,7 +23,7 @@ namespace cacheBenchmarker
             blah.RebuildIndex();
             blah.DoGets().Wait();
 
-            blah = new SqlServerBenchmarker();
+            blah = new SqlServerBenchmarker(numInserts, numReads);
             blah.DeleteData();
             blah.memOrDisk = "Mem";
             Console.WriteLine(blah.memOrDisk);

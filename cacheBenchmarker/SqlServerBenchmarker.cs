@@ -5,6 +5,7 @@ using System.Data.SqlClient;
 using cfg = System.Configuration.ConfigurationManager;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
+using System.Threading;
 //using System.Data.sqlc
 namespace cacheBenchmarker
 {
@@ -12,6 +13,14 @@ namespace cacheBenchmarker
     {
         ConcurrentBag<string> guids = new ConcurrentBag<string>();
         public string memOrDisk = "Mem";
+        int numInserts, numReads;
+        const int numParallel = 100;
+
+        public SqlServerBenchmarker(int numInserts, int numReads)
+        {
+            this.numInserts = numInserts;
+            this.numReads = numReads;
+        }
 
         public async Task<SqlConnection> GetConn()
         {
@@ -66,13 +75,13 @@ namespace cacheBenchmarker
         {
             using (SqlConnection conn = GetConn().Result)
             {
-                SqlCommand cmd = new SqlCommand("select top 100000 cacheKey from cacheMem;", conn);
+                SqlCommand cmd = new SqlCommand($"select top ${numReads} cacheKey from cacheMem;", conn);
                 
                 //cmd.Parameters.AddWithValue("cacheKey", cacheKey);
                 //string val = (string)(await cmd.ExecuteScalarAsync());
                 using (SqlDataReader reader = cmd.ExecuteReader())
                 {
-                    List<string> retval = new List<string>(100000);
+                    List<string> retval = new List<string>(numReads);
                     while (reader.Read())
                     {
                         retval.Add((string)reader[0]);
@@ -86,36 +95,33 @@ namespace cacheBenchmarker
         public async Task DoInserts()
         {
             DateTime startTime = DateTime.Now;
-            const int inserts = 1000000;
-            //const int inserts = 100;
-            //const int inserts = 2000000;
-            const int numChunk = 1000;
-            
+            //const int numChunck 
+            SemaphoreSlim slim = new SemaphoreSlim(numParallel);
             using (SqlConnection conn = await GetConn())
             {
-                //List<SqlConnection> sqlConnections = new List<SqlConnection>(inserts);
-                for (int i = 0; i < inserts; i++)
+                List<Task> tasks = new List<Task>(numInserts);
+                for (int i = 0; i < numInserts; i++)
                 {
-                    List<Task> tasks = new List<Task>(inserts);
-                    int nextChunk = i + numChunk;
-                    for (;i < nextChunk; i++)
-                    {
-                        tasks.Add(DoInsert(conn, i % 10 == 0));
-                    }
 
-                    //sqlConnections.Add(conn);
-                    await Task.WhenAll(tasks);
+                    //int nextChunk = i + numChunk;
+                    //for (;i < nextChunk; i++)
+                    //{
+                    await slim.WaitAsync();
+                    tasks.Add(DoInsert(conn, i % 10 == 0).ContinueWith(x => slim.Release()));
+                    //}
+
+                    
 
                 }
+                await Task.WhenAll(tasks);
 
-                
             }
             //tasks.ForEach(conn => { conn.Dispose(); });
 
             DateTime endTime = DateTime.Now;
             double seconds = (endTime - startTime).TotalSeconds;
-            double rowsPerSecond = inserts / seconds;
-            Console.WriteLine($"{inserts} rows written.. {seconds} seconds... {rowsPerSecond} rows per second");
+            double rowsPerSecond = numInserts / seconds;
+            Console.WriteLine($"{numInserts} rows written.. {seconds} seconds... {rowsPerSecond} rows per second");
         }
 
         public void RebuildIndex()
