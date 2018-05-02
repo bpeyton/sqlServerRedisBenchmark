@@ -198,3 +198,7 @@ Got guids
 10000 rows read.. 0.4975592 seconds... 20098.1109383567 rows per second
 Press any key to continue . . .
 
+---------------
+
+No improvements by limiting redis parallelism
+
