@@ -86,6 +86,7 @@ namespace cacheBenchmarker
             {
                 //RedisKey key = RedisKey;
                 await slim.WaitAsync();
+                
                 tasks.Add( db.StringGetAsync(id).ContinueWith(x => {
                     slim.Release();
                     return x.Result;
