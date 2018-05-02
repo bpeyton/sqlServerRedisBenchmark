@@ -64,7 +64,7 @@ namespace cacheBenchmarker
             await Task.WhenAll(sets);
             stopwatch.Stop();
             double seconds = stopwatch.Elapsed.TotalSeconds;
-            double rowsPerSecond = ids.Count / seconds;
+            double rowsPerSecond = numInserts / seconds;
             Console.WriteLine($"{numInserts} sets completed.. {seconds} seconds... {rowsPerSecond} gets per second");
             
 
@@ -88,7 +88,7 @@ namespace cacheBenchmarker
             stopwatch.Stop();
             double seconds = stopwatch.Elapsed.TotalSeconds;
             double rowsPerSecond = ids.Count / seconds;
-            Console.WriteLine($"{ids.Count} gets read.. {seconds} seconds... {rowsPerSecond} gets per second");
+            Console.WriteLine($"{ids.Count} gets completed.. {seconds} seconds... {rowsPerSecond} gets per second");
             Console.WriteLine($"random value {tasks[482].Result}");
         }
 
