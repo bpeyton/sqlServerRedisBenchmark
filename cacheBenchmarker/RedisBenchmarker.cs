@@ -13,6 +13,7 @@ namespace cacheBenchmarker
     {
         const string connectionStr = "localhost:32768";
         int numInserts, numReads;
+        const int numParallel = int.MaxValue;
 
 
         ConnectionMultiplexer redis;
@@ -41,18 +42,20 @@ namespace cacheBenchmarker
             IDatabase db = redis.GetDatabase();
 
             int count = 0;
+            Random random = new Random();
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
             int getModulo = numInserts / numReads;
+            SemaphoreSlim slim = new SemaphoreSlim(numParallel);
             
-            List<Task<bool>> sets = new List<Task<bool>>(numInserts);
+            List<Task<int>> sets = new List<Task<int>>(numInserts);
             for (int i = 0; i < numInserts; i++)
             {
-                
 
-                Random random = new Random();
+                await slim.WaitAsync();
+
                 string guidStr = Guid.NewGuid().ToString();
-                sets.Add(db.StringSetAsync(guidStr, random.Next().ToString()));
+                sets.Add(db.StringSetAsync(guidStr, random.Next().ToString()).ContinueWith(x => slim.Release()));
                 Interlocked.Increment(ref count);
                 if (count % getModulo == 0)
                 {
@@ -65,7 +68,7 @@ namespace cacheBenchmarker
             stopwatch.Stop();
             double seconds = stopwatch.Elapsed.TotalSeconds;
             double rowsPerSecond = numInserts / seconds;
-            Console.WriteLine($"{numInserts} sets completed.. {seconds} seconds... {rowsPerSecond} gets per second");
+            Console.WriteLine($"{numInserts} sets completed.. {seconds} seconds... {rowsPerSecond} sets per second");
             
 
         }
@@ -74,14 +77,19 @@ namespace cacheBenchmarker
         {
             IDatabase db = redis.GetDatabase();
             List<Task<RedisValue>> tasks = new List<Task<RedisValue>>(ids.Count);
+
+            SemaphoreSlim slim = new SemaphoreSlim(numParallel);
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
 
             foreach (string id in ids)
             {
                 //RedisKey key = RedisKey;
-
-                tasks.Add( db.StringGetAsync(id));
+                await slim.WaitAsync();
+                tasks.Add( db.StringGetAsync(id).ContinueWith(x => {
+                    slim.Release();
+                    return x.Result;
+                }));
             }
             await Task.WhenAll(tasks);
 

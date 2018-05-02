@@ -4,7 +4,7 @@ namespace cacheBenchmarker
 {
     class Program
     {
-        const int numInserts = 100000;
+        const int numInserts = 1000000;
         const int numReads = 100000;
         static void Main(string[] args)
         {
