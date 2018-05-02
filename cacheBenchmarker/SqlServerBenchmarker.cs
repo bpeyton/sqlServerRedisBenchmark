@@ -139,15 +139,9 @@ namespace cacheBenchmarker
 
         public async Task DoGets()
         {
-            //List<string> guids = GetGuids();
             Console.WriteLine("Got guids");
             DateTime startTime = DateTime.Now;
-
-            //foreach (string x in guids)
-            //Parallel.ForEach(guids, x =>
-            //{
-
-            const string strGuid = "4e57a384-1ab5-4e8c-afea-08598cf95127";
+            
 
             using (SqlConnection conn = await GetConn())
             {
@@ -159,7 +153,6 @@ namespace cacheBenchmarker
                 }
                 await Task.WhenAll(tasks);
             }
-            //});
 
             DateTime endTime = DateTime.Now;
             double seconds = (endTime - startTime).TotalSeconds;

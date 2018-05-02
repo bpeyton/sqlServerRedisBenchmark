@@ -5,20 +5,23 @@ using StackExchange.Redis;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 
 namespace cacheBenchmarker
 {
     class RedisBenchmarker
     {
         const string connectionStr = "localhost:32768";
-        
+        int numInserts, numReads;
 
-        
+
         ConnectionMultiplexer redis;
         ConcurrentBag<string> ids = new ConcurrentBag<string>();
 
-        public RedisBenchmarker()
+        public RedisBenchmarker(int numInserts, int numReads)
         {
+            this.numInserts = numInserts;
+            this.numReads = numReads;
             ConfigurationOptions options = ConfigurationOptions.Parse(connectionStr);
             options.AllowAdmin = true;
             redis = ConnectionMultiplexer.Connect(options);
@@ -38,9 +41,10 @@ namespace cacheBenchmarker
             IDatabase db = redis.GetDatabase();
 
             int count = 0;
-            DateTime startTime = DateTime.Now;
-            //Parallel.For(0, 1000000, new ParallelOptions() { MaxDegreeOfParallelism = 10 }, i =>
-            const int numInserts = 1000000;
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            int getModulo = numInserts / numReads;
+            
             List<Task<bool>> sets = new List<Task<bool>>(numInserts);
             for (int i = 0; i < numInserts; i++)
             {
@@ -48,22 +52,18 @@ namespace cacheBenchmarker
 
                 Random random = new Random();
                 string guidStr = Guid.NewGuid().ToString();
-                //db.StringSet(guidStr, random.Next().ToString());
                 sets.Add(db.StringSetAsync(guidStr, random.Next().ToString()));
                 Interlocked.Increment(ref count);
-                if (count % 10 == 0)
+                if (count % getModulo == 0)
                 {
                     ids.Add(guidStr);
                 }
-                //if (count % 10000 == 0)
-                //{
-                //    Console.WriteLine("count = " + count.ToString());
-                //}
+                
             }
             
             await Task.WhenAll(sets);
-            DateTime endTime = DateTime.Now;
-            double seconds = (endTime - startTime).TotalSeconds;
+            stopwatch.Stop();
+            double seconds = stopwatch.Elapsed.TotalSeconds;
             double rowsPerSecond = ids.Count / seconds;
             Console.WriteLine($"{numInserts} sets completed.. {seconds} seconds... {rowsPerSecond} gets per second");
             
@@ -74,7 +74,8 @@ namespace cacheBenchmarker
         {
             IDatabase db = redis.GetDatabase();
             List<Task<RedisValue>> tasks = new List<Task<RedisValue>>(ids.Count);
-            DateTime startTime = DateTime.Now;
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
 
             foreach (string id in ids)
             {
@@ -84,8 +85,8 @@ namespace cacheBenchmarker
             }
             await Task.WhenAll(tasks);
 
-            DateTime endTime = DateTime.Now;
-            double seconds = (endTime - startTime).TotalSeconds;
+            stopwatch.Stop();
+            double seconds = stopwatch.Elapsed.TotalSeconds;
             double rowsPerSecond = ids.Count / seconds;
             Console.WriteLine($"{ids.Count} gets read.. {seconds} seconds... {rowsPerSecond} gets per second");
             Console.WriteLine($"random value {tasks[482].Result}");

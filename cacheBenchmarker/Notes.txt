@@ -179,3 +179,22 @@ All redis dbs flushed!
 random value 2005031620
 Press any key to continue . . .
 
+---------------
+
+Stopwatch!!!
+
+-----
+
+After adding semaphoreslim 100 to sql server
+
+Running benchmark!
+Disk
+100000 rows written.. 7.9333022 seconds... 12605.0914838464 rows per second
+Got guids
+10000 rows read.. 0.7266057 seconds... 13762.6225613149 rows per second
+Mem
+100000 rows written.. 7.2093046 seconds... 13870.9633658703 rows per second
+Got guids
+10000 rows read.. 0.4975592 seconds... 20098.1109383567 rows per second
+Press any key to continue . . .
+

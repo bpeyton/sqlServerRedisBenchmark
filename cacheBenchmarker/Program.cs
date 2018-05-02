@@ -4,8 +4,8 @@ namespace cacheBenchmarker
 {
     class Program
     {
-        const int numInserts = 10000000;
-        const int numReads = 100000;
+        const int numInserts = 100000;
+        const int numReads = 10000;
         static void Main(string[] args)
         {
             Console.WriteLine("Running benchmark!");
@@ -35,7 +35,7 @@ namespace cacheBenchmarker
         static void BenchmarkRedis()
         {
             Console.WriteLine("Redis!");
-            RedisBenchmarker blah = new RedisBenchmarker();
+            RedisBenchmarker blah = new RedisBenchmarker(numInserts, numReads);
             blah.DeleteData();
             blah.DoInserts().Wait();
             blah.DoGets().Wait();
