@@ -59,9 +59,6 @@ namespace cacheBenchmarker
 
         public async Task<string> DoGet(SqlConnection conn, string cacheKey)
         {
-
-
-            //SqlCommand cmd = new SqlCommand("select cacheValue from cacheMem where cacheKey=@cacheKey;", conn);
             SqlCommand cmd = new SqlCommand("getCache" + memOrDisk, conn);
             cmd.CommandType = System.Data.CommandType.StoredProcedure;
             cmd.Parameters.AddWithValue("cacheKey", cacheKey);
