@@ -6,6 +6,7 @@ using cfg = System.Configuration.ConfigurationManager;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.Threading;
+using System.Diagnostics;
 //using System.Data.sqlc
 namespace cacheBenchmarker
 {
@@ -139,9 +140,9 @@ namespace cacheBenchmarker
 
         public async Task DoGets()
         {
-            Console.WriteLine("Got guids");
-            DateTime startTime = DateTime.Now;
-            
+
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
 
             using (SqlConnection conn = await GetConn())
             {
@@ -154,8 +155,8 @@ namespace cacheBenchmarker
                 await Task.WhenAll(tasks);
             }
 
-            DateTime endTime = DateTime.Now;
-            double seconds = (endTime - startTime).TotalSeconds;
+            stopwatch.Stop();
+            double seconds = stopwatch.Elapsed.TotalSeconds;
             double rowsPerSecond = guids.Count / seconds;
             Console.WriteLine($"{guids.Count} rows read.. {seconds} seconds... {rowsPerSecond} rows per second");
         }
