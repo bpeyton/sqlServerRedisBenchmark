@@ -202,3 +202,27 @@ Press any key to continue . . .
 
 No improvements by limiting redis parallelism
 
+--------------
+Without delayed durability
+
+Running benchmark!
+Disk
+1000 rows written.. 0.1310196 seconds... 7632.44583253193 rows per second
+100 rows read.. 0.0113943 seconds... 8776.31798355318 rows per second
+Mem
+1000 rows written.. 0.0918658 seconds... 10885.443766886 rows per second
+100 rows read.. 0.0047094 seconds... 21234.1274897014 rows per second
+Redis!
+
+
+Same but with it
+
+Running benchmark!
+Disk
+1000 rows written.. 2.6949854 seconds... 371.059524107255 rows per second
+100 rows read.. 0.0228195 seconds... 4382.21696356187 rows per second
+Mem
+1000 rows written.. 2.6712801 seconds... 374.35235638524 rows per second
+100 rows read.. 0.0102364 seconds... 9769.0594349576 rows per second
+Redis!
+
