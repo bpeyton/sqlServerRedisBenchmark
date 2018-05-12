@@ -226,3 +226,20 @@ Mem
 100 rows read.. 0.0102364 seconds... 9769.0594349576 rows per second
 Redis!
 
+---------------
+
+Final go at it; numparallel = 100
+
+Running benchmark!
+Disk
+1000000 rows written.. 79.7014064 seconds... 12546.8300393756 rows per second
+100000 rows read.. 7.9927203 seconds... 12511.3848910739 rows per second
+Mem
+1000000 rows written.. 71.2230771 seconds... 14040.3930961304 rows per second
+100000 rows read.. 5.203912 seconds... 19216.3126509441 rows per second
+Redis!
+All redis dbs flushed!
+1000000 sets completed.. 3.7218481 seconds... 268683.721939109 sets per second
+100000 gets completed.. 0.3396342 seconds... 294434.423859552 gets per second
+random value 1178443466
+Press any key to continue . . .
